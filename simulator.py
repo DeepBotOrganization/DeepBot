@@ -3,6 +3,7 @@ import random
 import signal
 import time
 import copy
+from team21 import Player21
 
 class TimedOutExc(Exception):
 	pass
@@ -27,7 +28,7 @@ class Manual_Player:
 	def move(self, board, old_move, flag):
 		print 'Enter your move: <format:row column> (you\'re playing with', flag + ")"	
 		mvp = raw_input()
-		mvp = mvp.split()
+		mvp = mvp.split()		
 		return (int(mvp[0]), int(mvp[1]))
 
 class Board:
@@ -315,6 +316,9 @@ if __name__ == '__main__':
 	elif option == '3':
 		obj1 = Manual_Player()
 		obj2 = Manual_Player()
+	elif option == '4':
+		obj1 = Random_Player()
+		obj2 = Player21()
 	else:
 		print 'Invalid option'
 		sys.exit(1)
