@@ -170,10 +170,12 @@ def gameplay(obj1, obj2):				#game simulator
 	game_board = Board()
 	fl1 = 'x'
 	fl2 = 'o'
+	# fl1 = 'a'
+	# fl2 = 'b'
 	old_move = (-1,-1)
 	WINNER = ''
 	MESSAGE = ''
-	TIME = 15
+	TIME = 1000000000
 	pts1 = 0
 	pts2 = 0
 
@@ -196,7 +198,8 @@ def gameplay(obj1, obj2):				#game simulator
 		except Exception as e:
 			WINNER = 'P2'
 			MESSAGE = 'INVALID MOVE'
-			pts2 = 16			
+			pts2 = 16		
+			print e	
 			break
 		signal.alarm(0)
 
@@ -242,7 +245,8 @@ def gameplay(obj1, obj2):				#game simulator
 		except Exception as e:
 			WINNER = 'P1'
 			MESSAGE = 'INVALID MOVE'
-			pts1 = 16			
+			pts1 = 16		
+			print e	
 			break
 		signal.alarm(0)
 		if (game_board.block_status != temp_block_status) or (game_board.board_status != temp_board_status):
@@ -274,6 +278,8 @@ def gameplay(obj1, obj2):				#game simulator
 
 	print "Winner:", WINNER
 	print "Message", MESSAGE
+
+	# print e
 
 	x = 0
 	d = 0
