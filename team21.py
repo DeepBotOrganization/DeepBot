@@ -5,7 +5,6 @@ class Player21:
 
 	def __init__(self):
 		"""This is This """	
-		self.b = Board()
 
 	def hueristic(self, x, y, board_status):
 		
@@ -94,7 +93,7 @@ class Player21:
 				score = 0
 				x = i;
 				y = j;
-				print "player", player, "has chosen ", i,j,"which has score",score
+				# print "player", player, "has chosen ", i,j,"which has score",score
 				return (score, i, j)
 
 
@@ -112,7 +111,7 @@ class Player21:
 						x = i;
 						y = j;
 
-						print "player", player, "has chosen ", i,j,"which has score",score
+						# print "player", player, "has chosen ", i,j,"which has score",score
 						return (score,i,j)
 
 				#if block is won
@@ -123,7 +122,7 @@ class Player21:
 					x = i;
 					y = j;
 					
-					print "player", player, "has chosen ", i,j,"which has score",score
+					# print "player", player, "has chosen ", i,j,"which has score",score
 					return (score, i, j)
 
 				value = self.minmax((i, j), board.find_valid_move_cells((i, j)), board, depth+1, 'o', alpha, beta)
@@ -147,7 +146,7 @@ class Player21:
 						score = -16
 						x = i;
 						y = j;
-						print "player", player, "has chosen ", i,j,"which has score",score
+						# print "player", player, "has chosen ", i,j,"which has score",score
 						return (score,i,j)
 
 				if board.block_status[i/4][j/4] == 'o':
@@ -156,7 +155,7 @@ class Player21:
 					score = -1
 					x = i;
 					y = j;					
-					print "player", player, "has chosen ", i,j,"which has score",score
+					# print "player", player, "has chosen ", i,j,"which has score",score
 					return (score, i, j)
 
 				value = self.minmax( (i, j), board.find_valid_move_cells((i, j)), board, depth+1, 'x', alpha, beta)
@@ -173,15 +172,15 @@ class Player21:
 			board.block_status = temp_block_status
 			board.board_status = temp_board_status
 
-		print "player", player, "has chosen ", x,y,"which has score",score
+		# print "player", player, "has chosen ", x,y,"which has score",score
 		return (score,x,y)
 
 	def move(self, board, old_move, flag):
 		# time.sleep(5)
-		self.b = board
+		self.board = copy.deepcopy(board)
 		self.player = flag
 		valid_cells = board.find_valid_move_cells(old_move)
-		tuplex = self.minmax(old_move, valid_cells, self.b, 0, flag, -100000, 100000)
+		tuplex = self.minmax(old_move, valid_cells, self.board, 0, flag, -100000, 100000)
 		print tuplex
 		return (tuplex[1],tuplex[2])
 
