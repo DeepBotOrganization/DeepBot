@@ -177,6 +177,8 @@ class Player21:
 
 	def move(self, board, old_move, flag):
 		# time.sleep(5)
+		if board.board_status == [['-' for j in range(16)]for i in range(16)]:
+			return(0, 0)
 		self.board = copy.deepcopy(board)
 		self.player = flag
 		valid_cells = board.find_valid_move_cells(old_move)

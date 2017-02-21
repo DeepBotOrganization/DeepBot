@@ -175,7 +175,7 @@ def gameplay(obj1, obj2):				#game simulator
 	old_move = (-1,-1)
 	WINNER = ''
 	MESSAGE = ''
-	TIME = 1000000000
+	TIME = 15
 	pts1 = 0
 	pts2 = 0
 
@@ -307,6 +307,9 @@ if __name__ == '__main__':
 		print '<option> can be 1 => Random player vs. Random player'
 		print '                2 => Human vs. Random Player'
 		print '                3 => Human vs. Human'
+		print '                4 => Random Player vs. Player 21'
+		print '                5 => Player 21 vs. Random Player'
+		print '                6 => Player 21 vs. Player 21'
 		sys.exit(1)
  
 	obj1 = ''
@@ -324,6 +327,12 @@ if __name__ == '__main__':
 		obj2 = Manual_Player()
 	elif option == '4':
 		obj1 = Random_Player()
+		obj2 = Player21()
+	elif option == '5':
+		obj1 = Player21()
+		obj2 = Random_Player()		
+	elif option == '6':
+		obj1 = Player21()
 		obj2 = Player21()
 	else:
 		print 'Invalid option'
