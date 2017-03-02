@@ -7,64 +7,72 @@ class Player21:
 		"""This is This """	
 
 	def hueristic(self, x, y, board_status):
-		
+		hX = 0
+		hO = 0
+
 		if self.player == 'x':
-			# row or coloumn
-			for i in range(4):
-				score = 0
-				for j in range(4):
-					if board_status[x+i][y+j] != 'o':
-						if board_status[x+i][y+j] == 'x':
-							score += 1
-					else:
-						score += -5
-				
-			score *= 2
-
-			# left diagnol
-			for i in range(4):
-				if board_status[x+i][y+i] != 'o':
-					if board_status[x+i][y+i] == 'x':
-						score += 1
-				else:
-					score += -5
-			# right diagnol
-			for i in range(3,-1,-1):
-				if board_status[x+i][y+i] != 'o':
-					if board_status[x+i][y+i] == 'x':
-						score += 1
-				else:
-					score += -5
-
+			empty_block_value = 0.5
 		else:
-			# row coloumn
-			for i in range(4):
-				score = 0
-				for j in range(4):
-					if board_status[x+i][y+j] != 'x':
-						if board_status[x+i][y+j] == 'o':
-							score += 1
-					else:
-						score += -5
-				
-			score *= 2
-			
-			# left diagnol
-			for i in range(4):
-				if board_status[x+i][y+i] != 'x':
-					if board_status[x+i][y+i] == 'o':
-						score += 1
-				else:
-					score += -5
-			# right diagnol
-			for i in range(3,-1,-1):
-				if board_status[x+i][y+i] != 'x':
-					if board_status[x+i][y+i] == 'o':
-						score += 1
-				else:
-					score += -5
+			empty_block_value = -2
 
-		return score			
+		# row
+		for i in range(4):
+			score = 0
+			for j in range(4):
+				if board_status[x+i][y+j] == 'x':
+					score += 1
+				elif board_status[x+i][y+j] == 'o':
+					score += -5
+				else:
+					score += empty_block_value
+
+			hX = max(score,hX)
+			hO = min(score,hO)
+		
+		#column	
+		for j in range(4):
+			score = 0
+			for i in range(4):
+				if board_status[x+i][y+j] == 'x':
+					score += 1
+				elif board_status[x+i][y+j] == 'o':
+					score += -5
+				else:
+					score += empty_block_value
+
+			hX = max(score,hX)
+			hO = min(score,hO)
+
+		score = 0
+		# left diagnol
+		for i in range(4):
+			if board_status[x+i][y+i] == 'x':
+					score += 1
+			elif board_status[x+i][y+i] == 'o':
+				score += -5
+			else:
+				score += empty_block_value
+
+		hX = max(score,hX)
+		hO = min(score,hO)
+
+		score = 0
+		# right diagnol
+		for i in range(3,-1,-1):
+			if board_status[x+i][y+i] == 'x':
+					score += 1
+			elif board_status[x+i][y+i] == 'o':
+				score += -5
+			else:
+				score += empty_block_value
+
+		hX = max(score,hX)
+		hO = min(score,hO)
+		
+		if self.player == 'x':	
+			return hX
+
+		return hO
 
 	def minmax(self, old_move, valid_cells, board, depth, player, alpha, beta):
 		
@@ -188,19 +196,40 @@ class Player21:
 
 	def board_hueristic(self, board_status):
 
-		score = 0
+		bX = 0
+		bO = 0
 		# board heuristic
+
+		#row 
 		for i in range(4):
+			score = 0
 			for j in range(4):
 				score += self.hueristic(4*i, 4*j, board_status)
+			bX = max(score, bX)
+			bO = min(score, bO)
 
+		#column
+		for j in range(4):
+			score = 0
+			for i in range(4):
+				score += self.hueristic(4*i, 4*j, board_status)
+			bX = max(score, bX)
+			bO = min(score, bO)		
 
-		score *= 2
+		score = 0
 		#left diagnol
 		for i in range(4):
 			score += self.hueristic(4*i, 4*i, board_status)
+		bX = max(score, bX)
+		bO = min(score, bO)
+
+		score = 0
 		#right diagnol
 		for i in range(3,-1,-1):
 			score += self.hueristic(4*i, 4*i, board_status)
+		bX = max(score, bX)
+		bO = min(score, bO)
 
-		return score
+		if self.player == 'x':
+			return bX
+		return bO

@@ -199,7 +199,7 @@ def gameplay(obj1, obj2):				#game simulator
 			WINNER = 'P2'
 			MESSAGE = 'INVALID MOVE'
 			pts2 = 16		
-			print e	
+			print "EXCEPTION:", e	
 			break
 		signal.alarm(0)
 
@@ -246,7 +246,7 @@ def gameplay(obj1, obj2):				#game simulator
 			WINNER = 'P1'
 			MESSAGE = 'INVALID MOVE'
 			pts1 = 16		
-			print e	
+			print "EXCEPTION:", type(e), e
 			break
 		signal.alarm(0)
 		if (game_board.block_status != temp_block_status) or (game_board.board_status != temp_board_status):
@@ -318,7 +318,6 @@ if __name__ == '__main__':
 	if option == '1':
 		obj1 = Random_Player()
 		obj2 = Random_Player()
-
 	elif option == '2':
 		obj1 = Random_Player()
 		obj2 = Manual_Player()
