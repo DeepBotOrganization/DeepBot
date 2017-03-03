@@ -6,172 +6,176 @@ class Player21:
 	def __init__(self):
 		"""This is This """	
 
-	def hueristic(self, x, y, board_status):
-		hX = 0
-		hO = 0
-
-		if self.player == 'x':
-			empty_block_value = 0.5
+	def cell_heuristic(self, i, j, status):
+		H = [
+				[3,2,2,3],
+				[2,3,3,2],
+				[2,3,3,2],
+				[3,2,2,3]
+			]
+		
+		if status[i][j] == 'x':
+			return H[i-4*(i/4)][j-4*(j/4)]
+		elif status[i][j] == 'o':
+			return -H[i-4*(i/4)][j-4*(j/4)]
 		else:
-			empty_block_value = -2
+			return 0.5
 
-		# row
-		for i in range(4):
-			score = 0
-			for j in range(4):
-				if board_status[x+i][y+j] == 'x':
-					score += 1
-				elif board_status[x+i][y+j] == 'o':
-					score += -5
-				else:
-					score += empty_block_value
+	def row_heuristic(self, block, row_number, board_status):
+		x = block[0]
+		y = block[1]
+		score = 1
 
-			hX = max(score,hX)
-			hO = min(score,hO)
-		
-		#column	
-		for j in range(4):
-			score = 0
-			for i in range(4):
-				if board_status[x+i][y+j] == 'x':
-					score += 1
-				elif board_status[x+i][y+j] == 'o':
-					score += -5
-				else:
-					score += empty_block_value
+		for i in range(0,4):
+			score *= self.cell_heuristic(4*x+row_number, 4*y+i, board_status)
 
-			hX = max(score,hX)
-			hO = min(score,hO)
+		return score	
+
+	def column_heuristic(self, block, column_number, board_status):
+		x = block[0]
+		y = block[1]
+		score = 1
+		for i in range(0,4):
+			score *= self.cell_heuristic(4*x+i, 4*y+column_number, board_status)
+		return score
+
+	def diagonals_heuristic(self, block, board_status):
+		x = block[0]
+		y = block[1]
+		score = 1
+
+		for i in range(0, 4):
+			score *= self.cell_heuristic(4*x+i, 4*y+i, board_status)
+
+		for i in range(3, -1, -1):
+			score *= self.cell_heuristic(4*x+i, 4*y+i, board_status)
+
+		return score
+
+	def block_heuristic(self, block, board_status):
+		score = 0
+
+		for i in range(0, 4):
+			score += self.row_heuristic(block, i, board_status)
+			score += self.column_heuristic(block, i, board_status)
+
+		score += self.diagonals_heuristic(block, board_status)
+
+		return score
+
+	def board_heuristic(self, board):
+		state = board.find_terminal_state()
+		if state[1] == 'WON':
+			if state[0] == 'x':
+				return (100000, old_move)
+			if state[0] == 'o':
+				return (-100000, old_move)
 
 		score = 0
-		# left diagnol
-		for i in range(4):
-			if board_status[x+i][y+i] == 'x':
-					score += 1
-			elif board_status[x+i][y+i] == 'o':
-				score += -5
-			else:
-				score += empty_block_value
 
-		hX = max(score,hX)
-		hO = min(score,hO)
+		for i in range(0, 4):
+			for j in range(0, 4):
+				score += self.block_heuristic((i,j), board.board_status)
 
-		score = 0
-		# right diagnol
-		for i in range(3,-1,-1):
-			if board_status[x+i][y+i] == 'x':
-					score += 1
-			elif board_status[x+i][y+i] == 'o':
-				score += -5
-			else:
-				score += empty_block_value
+		#block_status heuristic
+		temp_score = 1
+		for i in range(0,4):
+			for j in range(0, 4):
+				temp_score *= self.cell_heuristic(i, j, board.block_status) #block_status row
+				temp_score *= self.cell_heuristic(j, i, board.block_status) #block_status column
 
-		hX = max(score,hX)
-		hO = min(score,hO)
+		for i in range(0,4):
+			temp_score *= self.cell_heuristic(i, i, board.block_status) #block_status row
+
+		for i in range(3, -1, -1):
+			temp_score *= self.cell_heuristic(i, i, board.block_status) #block_status row
+
+		score += 5*temp_score
+
+		return score	
+
+	def minmax(self, old_move, board, depth, player, alpha, beta):
 		
-		if self.player == 'x':	
-			return hX
+		valid_cells = board.find_valid_move_cells(old_move)
 
-		return hO
+		if depth == 8 or time.time()-self.start_time >= 14:
+			x = self.board_heuristic(board)
+			return (x, old_move)
 
-	def minmax(self, old_move, valid_cells, board, depth, player, alpha, beta):
-		
-		if depth == 5:
-			return (self.board_hueristic(board.board_status), old_move[0], old_move[1])
-
+		# present block is won/made draw
 		if len(valid_cells) == 0:
-			return (-2, -1, -1)
+			for i in range(0, 16):
+				for j in range(0, 16):
+					if board.board_status[i][j] == '-':
+						valid_cells.append((i,j))
 		
+		# all cells present in board are filled
+		if len(valid_cells) == 0:
+			state = board.find_terminal_state()
+			if state[1] == 'WON':
+				if state[0] == 'x':
+					return (100000,old_move)
+				else:
+					return (-100000,old_move)
+			return (0,old_move) #either board is won or is draw
+
 		temp_block_status = copy.deepcopy(board.block_status)
 		temp_board_status = copy.deepcopy(board.board_status)
 
-		x = 0
-		y = 0
+		move = (0, 0)
 
+		score = 0
 		for cell in valid_cells:
 			i = cell[0]
 			j = cell[1]
 			
-			board.update(old_move,(i,j),player)			
+			board.update(old_move,(i,j),player)
+			
+			#board is won by 'x' or 'o'
+			state = board.find_terminal_state()
+			if state[1] == 'WON':
+				if state[0] == 'x':
+					return (100000,(i,j))
+				else:
+					return (-100000,(i,j))
 
-			if board.block_status[i/4][j/4] == 'd':
-				board.board_status[i][j] = '-'
+			#board is won by 'x' or 'o'
+			if board.block_status[i/4][j/4] != '-':
+				for c in valid_cells:
+					i1 = cell[0]
+					j1 = cell[1]
+					board.board_status[i][j] = board.block_status[i/4][j/4] # fill all cell in that block with winning player
 				board.block_status = temp_block_status
 				board.board_status = temp_board_status
-				score = 0
-				x = i;
-				y = j;
-				# print "player", player, "has chosen ", i,j,"which has score",score
-				return (score, i, j)
+				return (self.board_heuristic(board),(i,j))
+				# valid_cells = []
 
+				# for i in range(0, 16):
+				# 	for j in range(0, 16):
+				# 		if board.board_status[i][j] == '-':
+				# 			valid_cells.append((i,j))
+				# continue
 
 			if player == 'x':
-
 				state = board.find_terminal_state()
-				score = -100000
-
-				# if board is won
-				if state[1] == 'WON':
-					if state[0] == 'x':
-						board.block_status = temp_block_status
-						board.board_status = temp_board_status
-						score = 16
-						x = i;
-						y = j;
-
-						# print "player", player, "has chosen ", i,j,"which has score",score
-						return (score,i,j)
-
-				#if block is won
-				if board.block_status[i/4][j/4] == 'x':
-					board.block_status = temp_block_status
-					board.board_status = temp_board_status
-					score = 1
-					x = i;
-					y = j;
-					
-					# print "player", player, "has chosen ", i,j,"which has score",score
-					return (score, i, j)
-
-				value = self.minmax((i, j), board.find_valid_move_cells((i, j)), board, depth+1, 'o', alpha, beta)
+				score = -1e15
+				value = self.minmax((i, j), board, depth+1, 'o', alpha, beta)
 				alpha = max(value[0],alpha)
 
 				if value[0] > score:
-					x = i;
-					y = j;
+					move = copy.deepcopy((i,j))
 					score = value[0]
 			
 				if alpha > beta:
 					break
 			else:
 				state = board.find_terminal_state()
-				score = 100000
-
-				if state[1] == 'WON':
-					if state[0] == 'o':
-						board.block_status = temp_block_status
-						board.board_status = temp_board_status
-						score = -16
-						x = i;
-						y = j;
-						# print "player", player, "has chosen ", i,j,"which has score",score
-						return (score,i,j)
-
-				if board.block_status[i/4][j/4] == 'o':
-					board.block_status = temp_block_status
-					board.board_status = temp_board_status
-					score = -1
-					x = i;
-					y = j;					
-					# print "player", player, "has chosen ", i,j,"which has score",score
-					return (score, i, j)
-
-				value = self.minmax( (i, j), board.find_valid_move_cells((i, j)), board, depth+1, 'x', alpha, beta)
+				score = 1e15
+				value = self.minmax( (i, j), board, depth+1, 'x', alpha, beta)
 				beta = min(value[0], beta)
 				
 				if value[0] < score :
-					x = i;
-					y = j;
+					move = copy.deepcopy((i,j))
 					score = value[0]
 				
 				if alpha > beta:
@@ -179,57 +183,30 @@ class Player21:
 
 			board.block_status = temp_block_status
 			board.board_status = temp_board_status
-
-		# print "player", player, "has chosen ", x,y,"which has score",score
-		return (score,x,y)
+		return (score,move)
 
 	def move(self, board, old_move, flag):
-		# time.sleep(5)
+		player = flag
+		if player == 'x':
+			opponent_player = 'o'
+		else:
+			opponent_player = 'x'
+
+		self.start_time = time.time()
+		
 		if board.board_status == [['-' for j in range(16)]for i in range(16)]:
 			return(0, 0)
-		self.board = copy.deepcopy(board)
-		self.player = flag
-		valid_cells = board.find_valid_move_cells(old_move)
-		tuplex = self.minmax(old_move, valid_cells, self.board, 0, flag, -100000, 100000)
-		print tuplex
-		return (tuplex[1],tuplex[2])
 
-	def board_hueristic(self, board_status):
-
-		bX = 0
-		bO = 0
-		# board heuristic
-
-		#row 
-		for i in range(4):
-			score = 0
-			for j in range(4):
-				score += self.hueristic(4*i, 4*j, board_status)
-			bX = max(score, bX)
-			bO = min(score, bO)
-
-		#column
-		for j in range(4):
-			score = 0
-			for i in range(4):
-				score += self.hueristic(4*i, 4*j, board_status)
-			bX = max(score, bX)
-			bO = min(score, bO)		
-
-		score = 0
-		#left diagnol
-		for i in range(4):
-			score += self.hueristic(4*i, 4*i, board_status)
-		bX = max(score, bX)
-		bO = min(score, bO)
-
-		score = 0
-		#right diagnol
-		for i in range(3,-1,-1):
-			score += self.hueristic(4*i, 4*i, board_status)
-		bX = max(score, bX)
-		bO = min(score, bO)
-
-		if self.player == 'x':
-			return bX
-		return bO
+		board = copy.deepcopy(board)
+		
+   		for i in range(0,16):
+   			for j in range(0,16):
+   				if board.block_status[i/4][j/4] == player:
+   					board.board_status[i][j] = player
+   				elif board.block_status[i/4][j/4] == opponent_player:
+   					board.board_status[i][j] = opponent_player
+		
+		
+		new_move = self.minmax(old_move, board, 0, flag, -1e15, 1e15)
+		print "NEW MOVE",new_move
+		return (new_move[1][0],new_move[1][1])

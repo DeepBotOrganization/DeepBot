@@ -4,6 +4,8 @@ import signal
 import time
 import copy
 from team21 import Player21
+from team13 import Player13
+from team85 import Player85
 
 class TimedOutExc(Exception):
 	pass
@@ -195,12 +197,12 @@ def gameplay(obj1, obj2):				#game simulator
 			MESSAGE = 'TIME OUT'
 			pts2 = 16
 			break
-		except Exception as e:
-			WINNER = 'P2'
-			MESSAGE = 'INVALID MOVE'
-			pts2 = 16		
-			print "EXCEPTION:", e	
-			break
+		# except Exception as e:
+		# 	WINNER = 'P2'
+		# 	MESSAGE = 'INVALID MOVE'
+		# 	pts2 = 16		
+		# 	print "EXCEPTION:", e	
+		# 	break
 		signal.alarm(0)
 
 		#check if board is not modified and move returned is valid
@@ -242,12 +244,12 @@ def gameplay(obj1, obj2):				#game simulator
 			MESSAGE = 'TIME OUT'
 			pts1 = 16
 			break
-		except Exception as e:
-			WINNER = 'P1'
-			MESSAGE = 'INVALID MOVE'
-			pts1 = 16		
-			print "EXCEPTION:", type(e), e
-			break
+		# except Exception as e:
+		# 	WINNER = 'P1'
+		# 	MESSAGE = 'INVALID MOVE'
+		# 	pts1 = 16		
+		# 	print "EXCEPTION:", type(e), e
+		# 	break
 		signal.alarm(0)
 		if (game_board.block_status != temp_block_status) or (game_board.board_status != temp_board_status):
 			WINNER = 'P1'
@@ -279,8 +281,6 @@ def gameplay(obj1, obj2):				#game simulator
 	print "Winner:", WINNER
 	print "Message", MESSAGE
 
-	# print e
-
 	x = 0
 	d = 0
 	o = 0
@@ -310,6 +310,14 @@ if __name__ == '__main__':
 		print '                4 => Random Player vs. Player 21'
 		print '                5 => Player 21 vs. Random Player'
 		print '                6 => Player 21 vs. Player 21'
+		print '                7 => Player 21 vs. Player 13'
+		print '                8 => Player 13 vs. Player 21'
+		print '                9 => Player 13 vs. Player 13'
+		print '               10 => Player 21 vs. Player 85'
+		print '               11 => Player 85 vs. Player 21'
+		print '               12 => Player 85 vs. Player 85'
+		print '               13 => Player 13 vs. Player 85'
+		print '               14 => Player 85 vs. Player 13'
 		sys.exit(1)
  
 	obj1 = ''
@@ -333,6 +341,30 @@ if __name__ == '__main__':
 	elif option == '6':
 		obj1 = Player21()
 		obj2 = Player21()
+	elif option == '7':
+		obj1 = Player21()
+		obj2 = Player13()
+	elif option == '8':
+		obj1 = Player13()
+		obj2 = Player21()
+	elif option == '9':
+		obj1 = Player13()
+		obj2 = Player13()
+	elif option == '10':
+		obj1 = Player21()
+		obj2 = Player85()
+	elif option == '11':
+		obj1 = Player85()
+		obj2 = Player21()
+	elif option == '12':
+		obj1 = Player85()
+		obj2 = Player85()
+	elif option == '13':
+		obj1 = Player13()
+		obj2 = Player85()
+	elif option == '14':
+		obj1 = Player85()
+		obj2 = Player13()
 	else:
 		print 'Invalid option'
 		sys.exit(1)
